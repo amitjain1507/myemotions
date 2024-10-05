@@ -1,107 +1,104 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 interface Emotion {
-  primary: string;
-  secondary: string[];
+  id: number;
+  name: string;
 }
 
-const primaryEmotions = [
-  'Joy',
-  'Trust',
-  'Fear',
-  'Surprise',
-  'Sadness',
-  'Disgust',
-  'Anger',
-  'Anticipation',
+interface SecondaryEmotion {
+  id: number;
+  name: string;
+  primaryEmotionId: number;
+}
+
+const primaryEmotions: Emotion[] = [
+  { id: 1, name: 'Joy' },
+  { id: 2, name: 'Trust' },
+  { id: 3, name: 'Fear' },
+  { id: 4, name: 'Surprise' },
+  { id: 5, name: 'Sadness' },
+  { id: 6, name: 'Disgust' },
+  { id: 7, name: 'Anger' },
+  { id: 8, name: 'Anticipation' },
 ];
 
-const secondaryEmotions = {
-  Joy: ['Optimism', 'Love', 'Submission'],
-  Trust: ['Faith', 'Confidence', 'Docility'],
-  Fear: ['Apprehension', 'Dread', 'Despair'],
-  Surprise: ['Amazement', 'Perplexity', 'Disillusionment'],
-  Sadness: ['Sorrow', 'Grief', 'Pessimism'],
-  Disgust: ['Boredom', 'Loathing', 'Remorse'],
-  Anger: ['Irritation', 'Exasperation', 'Rage'],
-  Anticipation: ['Interest', 'Vigilance', 'Agitation'],
-};
+const secondaryEmotions: SecondaryEmotion[] = [
+  { id: 1, name: 'Optimism', primaryEmotionId: 1 },
+  { id: 2, name: 'Love', primaryEmotionId: 1 },
+  { id: 3, name: 'Submission', primaryEmotionId: 2 },
+  { id: 4, name: 'Awe', primaryEmotionId: 2 },
+  { id: 5, name: 'Apprehension', primaryEmotionId: 3 },
+  { id: 6, name: 'Fear', primaryEmotionId: 3 },
+  { id: 7, name: 'Delight', primaryEmotionId: 4 },
+  { id: 8, name: 'Distraction', primaryEmotionId: 4 },
+  { id: 9, name: 'Pessimism', primaryEmotionId: 5 },
+  { id: 10, name: 'Despair', primaryEmotionId: 5 },
+  { id: 11, name: 'Disapproval', primaryEmotionId: 6 },
+  { id: 12, name: 'Loathing', primaryEmotionId: 6 },
+  { id: 13, name: 'Irritation', primaryEmotionId: 7 },
+  { id: 14, name: 'Exasperation', primaryEmotionId: 7 },
+  { id: 15, name: 'Interest', primaryEmotionId: 8 },
+  { id: 16, name: 'Vigilance', primaryEmotionId: 8 },
+];
 
 const App = () => {
-  const [selectedPrimaryEmotion, setSelectedPrimaryEmotion] = useState('');
-  const [selectedSecondaryEmotions, setSelectedSecondaryEmotions] = useState<string[]>([]);
-  const [emotionText, setEmotionText] = useState('');
+  const [selectedPrimaryEmotion, setSelectedPrimaryEmotion] = useState<Emotion | null>(null);
+  const [selectedSecondaryEmotions, setSelectedSecondaryEmotions] = useState<SecondaryEmotion[]>([]);
+  const [userEmotions, setUserEmotions] = useState<string>('');
 
-  const handlePrimaryEmotionChange = (emotion: string) => {
+  const handlePrimaryEmotionSelect = (emotion: Emotion) => {
     setSelectedPrimaryEmotion(emotion);
-    setSelectedSecondaryEmotions([]);
+    setSelectedSecondaryEmotions(secondaryEmotions.filter((secondaryEmotion) => secondaryEmotion.primaryEmotionId === emotion.id));
   };
 
-  const handleSecondaryEmotionChange = (emotion: string) => {
+  const handleSecondaryEmotionSelect = (emotion: SecondaryEmotion) => {
     if (selectedSecondaryEmotions.includes(emotion)) {
-      setSelectedSecondaryEmotions(selectedSecondaryEmotions.filter((e) => e !== emotion));
+      setSelectedSecondaryEmotions(selectedSecondaryEmotions.filter((secondaryEmotion) => secondaryEmotion.id !== emotion.id));
     } else {
       setSelectedSecondaryEmotions([...selectedSecondaryEmotions, emotion]);
     }
   };
 
-  const handleSubmit = () => {
-    if (selectedPrimaryEmotion) {
-      const emotion: Emotion = {
-        primary: selectedPrimaryEmotion,
-        secondary: selectedSecondaryEmotions,
-      };
-      setEmotionText(`I'm feeling ${emotion.primary} and also experiencing ${emotion.secondary.join(', ')}.`);
-    }
+  const handleShareEmotions = () => {
+    const emotions = selectedSecondaryEmotions.map((emotion) => emotion.name).join(', ');
+    setUserEmotions(`I'm feeling ${selectedPrimaryEmotion?.name} with ${emotions}.`);
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 mt-10 bg-white rounded-lg shadow-md">
-      <h1 className="text-3xl font-bold text-gray-900 mb-4">Share Your Emotions</h1>
-      <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2">Primary Emotion:</label>
-        <div className="flex flex-wrap justify-center">
-          {primaryEmotions.map((emotion) => (
+    <div className="max-w-md mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-4">Share Your Emotions</h1>
+      <div className="flex flex-wrap justify-center mb-4">
+        {primaryEmotions.map((emotion) => (
+          <button
+            key={emotion.id}
+            className={`bg-${emotion.id === selectedPrimaryEmotion?.id ? 'blue' : 'gray'}-500 hover:bg-${emotion.id === selectedPrimaryEmotion?.id ? 'blue' : 'gray'}-700 text-white font-bold py-2 px-4 rounded mx-2 my-2`}
+            onClick={() => handlePrimaryEmotionSelect(emotion)}
+          >
+            {emotion.name}
+          </button>
+        ))}
+      </div>
+      {selectedPrimaryEmotion && (
+        <div className="flex flex-wrap justify-center mb-4">
+          {selectedSecondaryEmotions.map((emotion) => (
             <button
-              key={emotion}
-              className={`bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg m-2 ${
-                selectedPrimaryEmotion === emotion ? 'bg-blue-500 text-white' : ''
-              }`}
-              onClick={() => handlePrimaryEmotionChange(emotion)}
+              key={emotion.id}
+              className={`bg-${selectedSecondaryEmotions.includes(emotion) ? 'blue' : 'gray'}-500 hover:bg-${selectedSecondaryEmotions.includes(emotion) ? 'blue' : 'gray'}-700 text-white font-bold py-2 px-4 rounded mx-2 my-2`}
+              onClick={() => handleSecondaryEmotionSelect(emotion)}
             >
-              {emotion}
+              {emotion.name}
             </button>
           ))}
         </div>
-      </div>
-      {selectedPrimaryEmotion && (
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Secondary Emotions:</label>
-          <div className="flex flex-wrap justify-center">
-            {secondaryEmotions[selectedPrimaryEmotion].map((emotion) => (
-              <button
-                key={emotion}
-                className={`bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg m-2 ${
-                  selectedSecondaryEmotions.includes(emotion) ? 'bg-blue-500 text-white' : ''
-                }`}
-                onClick={() => handleSecondaryEmotionChange(emotion)}
-              >
-                {emotion}
-              </button>
-            ))}
-          </div>
-        </div>
       )}
       <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"
-        onClick={handleSubmit}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-2 my-2"
+        onClick={handleShareEmotions}
       >
         Share Emotions
       </button>
-      {emotionText && (
-        <div className="mt-4 p-4 bg-gray-200 rounded-lg">
-          <p className="text-gray-700 text-lg">{emotionText}</p>
-        </div>
+      {userEmotions && (
+        <p className="text-lg font-bold mb-4">{userEmotions}</p>
       )}
     </div>
   );
